@@ -1,0 +1,9 @@
+[debug] Debug: setLogFile: /Users/mackuntu/coc_script/script.sikuli/SikuliLog.txt
+[debug (9/21/14 10:52:44 AM)] SikuliIDE: Switching to SikuliScript with option -r, -t or -i
+[debug (9/21/14 10:52:44 AM)] SikuliScript: CmdOrg: -d -r script.py
+[debug (9/21/14 10:52:44 AM)] Running on Java 7 (1.7.0_45-b18)
+[debug (9/21/14 10:52:44 AM)] --- Sikuli parameters ---
+[debug (9/21/14 10:52:44 AM)] 1: -d
+[debug (9/21/14 10:52:44 AM)] 2: -r
+[debug (9/21/14 10:52:44 AM)] 3: script.py
+[debug (9/21/14 10:52:44 AM)] SikuliScript: givenScriptName: script.py

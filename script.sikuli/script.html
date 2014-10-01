@@ -1,0 +1,155 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }
+
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>script.sikuli</h2> <a href="script.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="kw">import</span> random
+<span class="kw">import</span> time
+<span class="kw">import</span> itertools
+<span class="kw">from</span> org.sikuli.basics.proxies <span class="kw">import</span> Vision
+Vision.setParameter(<span class="str">"MinTargetSize"</span>, <span class="dig">6</span>)
+
+<span class="kw">def</span> do_res_collection():
+    <span class="kw">if</span> exists(<img src="1411319170247.png" />):
+            <span class="skw">click</span>(<img src="1411319170247.png" />)
+            <span class="skw">sleep</span>(<span class="dig">10</span>)
+    <span class="kw">while</span> <span class="kw">not</span> exists(<img src="1412005595303.png" />) <span class="kw">and</span> <span class="kw">not</span> exists(<img src="1412065753605.png" />):
+        <span class="skw">sleep</span>(<span class="dig">1</span>)
+    <span class="kw">if</span> exists(<img src="1412005595303.png" />):
+        <span class="skw">click</span>(<img src="1412005595303.png" />)
+    iter = <span class="dig">0</span>
+    <span class="kw">while</span> <span class="kw">not</span> exists(<img src="1412065753605.png" />):
+        <span class="skw">sleep</span>(<span class="dig">1</span>);
+    keyDown(Key.CMD)
+    <span class="kw">try</span>:
+        click_point = <span class="skw">find</span>(<img src="1412066302265.png" />)
+        drop_point = click_point.getTarget().offset(<span class="dig">400</span>,<span class="dig">400</span>)
+        <span class="skw">dragDrop</span>(click_point, drop_point)
+    <span class="kw">except</span>:
+        <span class="kw">print</span> <span class="str">"Zoom failed to find archer tower"</span>
+    keyUp(Key.CMD)
+    <span class="kw">while</span> iter &lt; <span class="dig">20</span>:
+        elixers = []
+        coins = []
+        dark = []
+        <span class="kw">try</span>:
+            <span class="kw">if</span> exists(Pattern(<img src="1411925620763.png" />).similar(<span class="dig">0.95</span>)):
+                <span class="kw">print</span> <span class="str">"elixer exists"</span>
+                elixers = findAll(<img src="1411925620763.png" />)
+            <span class="kw">if</span> exists(<img src="1412067211035.png" />):
+                <span class="kw">print</span> <span class="str">"coin exists"</span>
+                coins = findAll(<img src="1412067211035.png" />)
+            <span class="kw">if</span> exists(<img src="1412067266022.png" />):
+                <span class="kw">print</span> <span class="str">"dark exists"</span>
+                dark = findAll(<img src="1412067266022.png" />)
+            all_resources = itertools.chain(elixers, coins, dark)
+
+            <span class="kw">for</span> c <span class="kw">in</span> all_resources:
+                <span class="skw">click</span>(c)
+        <span class="kw">except</span>:
+            <span class="kw">print</span> <span class="str">"exception"</span>
+
+        <span class="skw">sleep</span>(random.randint(<span class="dig">10</span>,<span class="dig">30</span>))
+        iter += <span class="dig">1</span>
+    <span class="skw">click</span>(<img src="1412065594056.png" />)
+    <span class="kw">while</span> <span class="kw">not</span> exists(<img src="1412065642545.png" />):
+        <span class="skw">sleep</span>(<span class="dig">1</span>)
+    <span class="skw">click</span>(<img src="1412065642545.png" />)
+
+<span class="kw">def</span> collect_forever():
+    <span class="kw">while</span>(True):
+        do_res_collection()
+        <span class="skw">sleep</span>(<span class="dig">60</span>)
+
+<span class="kw">if</span> exists(<img src="1412065753605.png" />):
+    collect_forever()
+<span class="cmt"># launch genymotion through alfred
+</span>keyDown(Key.CMD)
+keyDown(Key.SPACE)
+keyUp(Key.CMD)
+keyUp(Key.SPACE)
+<span class="skw">type</span>(<span class="str">"geny"</span> + Key.ENTER)
+
+<span class="cmt"># Wait for genymotion to load then start vm
+</span><span class="kw">while</span> <span class="kw">not</span> exists(<img src="1412005237101.png" />):
+    <span class="skw">sleep</span>(<span class="dig">5</span>)
+<span class="skw">click</span>(<img src="1412005237101.png" />)
+
+<span class="cmt"># Wait for android homescreen
+</span>
+<span class="kw">while</span> <span class="kw">not</span> exists(<img src="1412005436007.png" />) <span class="kw">and</span> <span class="kw">not</span> exists(<img src="1412005595303.png" />):
+    <span class="skw">sleep</span>(<span class="dig">5</span>)
+screen_locked = exists(<img src="1412005436007.png" />)
+<span class="kw">if</span> screen_locked:
+    <span class="skw">dragDrop</span>(<img src="1412005436007.png" />,<img src="1412005489167.png" />)
+collect_forever()
+</pre>
+</body>
+</html>
