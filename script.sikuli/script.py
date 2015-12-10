@@ -7,12 +7,11 @@ import datetime
 android_clash_icon = Pattern("1449675544548.png").similar(0.79)
 android_lock_button = "1412005436007.png"
 
-clash_game_icon = "1449765483207.png"
+clash_game_icon = Pattern("1449765483207.png").similar(0.70)
 clash_reload_button = "clash_reload_button.png"
 clash_info_button = Pattern("1449651262055.png").similar(0.80)
-clash_elixer_pattern = Pattern("1449765631958.png").similar(0.86)
-clash_coin_pattern = Pattern("1449765702720.png").similar(0.81)
-clash_dark_pattern = Pattern("1449765745821.png").similar(0.88)
+clash_elixer_pattern = Pattern("1449765631958.png").similar(0.70)
+clash_coin_pattern = Pattern("1449765702720.png").similar(0.70)
 clash_confirm_button = Pattern("1449675171323.png").similar(0.84)
 
 geny_back_button = Pattern("1412065594056.png").similar(0.67)
@@ -35,7 +34,7 @@ def try_resize():
       resized = True
       keyUp(Key.CMD)
     # move screen down
-    dragDrop(start_point, start_point.getTarget().offset(0,300))
+    dragDrop(start_point, start_point.getTarget().offset(0,200))
   return resized
 
 def do_res_collection():
@@ -60,7 +59,7 @@ def do_res_collection():
     sleep(1)
   resources = []
   if exists(clash_elixer_pattern):
-    print "elixer exists"
+    print "elixer and dark exists"
     try:
       resources += findAll(clash_elixer_pattern)
     except:
@@ -71,12 +70,6 @@ def do_res_collection():
       resources += findAll(clash_coin_pattern)
     except:
       print "failed to add coin finds"
-  if exists(clash_dark_pattern):
-    print "dark exists"
-    try:
-      resources += findAll(clash_dark_pattern)
-    except:
-      print "failed to add dark finds"
   print "starting to click all found resource targets"
   random.shuffle(resources)
   for resource in resources:
