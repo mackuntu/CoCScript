@@ -81,10 +81,10 @@ android_lock_button = <img src="1412005436007.png" />
 
 clash_game_icon = <img src="1449765483207.png" />
 clash_reload_button = <img src="clash_reload_button.png" />
+clash_reload_another_device = <img src="clash_reload_another_device.png" />
 clash_info_button = Pattern(<img src="1449651262055.png" />).similar(<span class="dig">0.80</span>)
-clash_elixer_pattern = Pattern(<img src="1449765631958.png" />).similar(<span class="dig">0.86</span>)
-clash_coin_pattern = Pattern(<img src="1449765702720.png" />).similar(<span class="dig">0.81</span>)
-clash_dark_pattern = Pattern(<img src="1449765745821.png" />).similar(<span class="dig">0.88</span>)
+clash_elixer_pattern = Pattern(<img src="1449765631958.png" />).similar(<span class="dig">0.83</span>)
+clash_coin_pattern = <img src="1449765702720.png" />
 clash_confirm_button = Pattern(<img src="1449675171323.png" />).similar(<span class="dig">0.84</span>)
 
 geny_back_button = Pattern(<img src="1412065594056.png" />).similar(<span class="dig">0.67</span>)
@@ -100,14 +100,13 @@ MAX_SLEEP_SECONDS = MAX_SLEEP_MINUTES_BETWEEN_COLLECTION * <span class="dig">60<
   <span class="kw">if</span> exists(clash_info_button):
     <span class="kw">print</span> <span class="str">"found info target"</span>
     start_point = <span class="skw">find</span>(clash_info_button.targetOffset(random.randint(<span class="dig">50</span>, <span class="dig">100</span>),random.randint(<span class="dig">50</span>, <span class="dig">100</span>)))
-    drop_point = start_point.getTarget().offset(random.randint(<span class="dig">400</span>, <span class="dig">600</span>),random.randint(<span class="dig">2</span>,<span class="dig">90</span>))
+    drop_point = start_point.getTarget().offset(random.randint(<span class="dig">600</span>, <span class="dig">650</span>),<span class="dig">200</span>)
 
     keyDown(Key.CMD)
     <span class="kw">if</span> <span class="skw">dragDrop</span>(start_point, drop_point) == <span class="dig">1</span>:
       resized = True
       keyUp(Key.CMD)
     <span class="cmt"># move screen down</span>
-    <span class="skw">dragDrop</span>(start_point, start_point.getTarget().offset(<span class="dig">0</span>,<span class="dig">300</span>))
   <span class="kw">return</span> resized
 
 <span class="kw">def</span> do_res_collection():
@@ -116,7 +115,8 @@ MAX_SLEEP_SECONDS = MAX_SLEEP_MINUTES_BETWEEN_COLLECTION * <span class="dig">60<
     <span class="kw">print</span> <span class="str">"asked to reload"</span>
     <span class="skw">click</span>(clash_reload_button)
     <span class="kw">print</span> <span class="str">"clicked reload, now sleeping for 10 seconds"</span>
-    <span class="skw">sleep</span>(<span class="dig">10</span>)
+  <span class="kw">if</span> exists(clash_reload_another_device):
+
   <span class="kw">while</span> <span class="kw">not</span> exists(android_clash_icon) <span class="kw">and</span> <span class="kw">not</span> exists(clash_game_icon):
     <span class="kw">print</span> <span class="str">"no clash icon and no in game icon, waiting"</span>
     <span class="skw">sleep</span>(<span class="dig">1</span>)
@@ -132,33 +132,42 @@ MAX_SLEEP_SECONDS = MAX_SLEEP_MINUTES_BETWEEN_COLLECTION * <span class="dig">60<
     <span class="skw">sleep</span>(<span class="dig">1</span>)
   resources = []
   <span class="kw">if</span> exists(clash_elixer_pattern):
-    <span class="kw">print</span> <span class="str">"elixer exists"</span>
-    <span class="kw">try</span>:
-      resources += findAll(clash_elixer_pattern)
-    <span class="kw">except</span>:
-      <span class="kw">print</span> <span class="str">"failed to add elixer finds"</span>
+    <span class="kw">print</span> <span class="str">"elixer and dark exists"</span>
+    added = False
+    i = <span class="dig">0</span>
+    <span class="kw">while</span> <span class="kw">not</span> added <span class="kw">and</span> i &lt; <span class="dig">3</span>:
+      <span class="kw">try</span>:
+        resources += findAll(clash_elixer_pattern)
+        added = True
+      <span class="kw">except</span>:
+        <span class="kw">print</span> <span class="str">"failed to add elixer finds, retry?"</span>, ++i &lt; <span class="dig">3</span>
   <span class="kw">if</span> exists(clash_coin_pattern):
     <span class="kw">print</span> <span class="str">"coin exists"</span>
-    <span class="kw">try</span>:
-      resources += findAll(clash_coin_pattern)
-    <span class="kw">except</span>:
-      <span class="kw">print</span> <span class="str">"failed to add coin finds"</span>
-  <span class="kw">if</span> exists(clash_dark_pattern):
-    <span class="kw">print</span> <span class="str">"dark exists"</span>
-    <span class="kw">try</span>:
-      resources += findAll(clash_dark_pattern)
-    <span class="kw">except</span>:
-      <span class="kw">print</span> <span class="str">"failed to add dark finds"</span>
+    added = False
+    i = <span class="dig">0</span>
+    <span class="kw">while</span> <span class="kw">not</span> added <span class="kw">and</span> i &lt; <span class="dig">3</span>:
+      <span class="kw">try</span>:
+        resources += findAll(clash_coin_pattern)
+        added = True
+      <span class="kw">except</span>:
+        <span class="kw">print</span> <span class="str">"failed to add coin finds, retry?"</span>, ++i &lt; <span class="dig">3</span>
   <span class="kw">print</span> <span class="str">"starting to click all found resource targets"</span>
   random.shuffle(resources)
   <span class="kw">for</span> resource <span class="kw">in</span> resources:
       <span class="skw">click</span>(resource)
   <span class="kw">print</span> <span class="str">"finisheed clicking all resource targets"</span>
 
-  <span class="skw">click</span>(geny_back_button)
-  <span class="kw">print</span> <span class="str">"clicked geny_back_button"</span>
-  <span class="skw">wait</span>(clash_confirm_button, <span class="dig">10</span>)
-  <span class="kw">print</span> <span class="str">"wait for confirm exit"</span>
+  exitable = False
+  <span class="kw">while</span> <span class="kw">not</span> exitable:
+    <span class="skw">click</span>(geny_back_button)
+    <span class="kw">print</span> <span class="str">"clicked geny_back_button"</span>
+    <span class="kw">try</span>:
+      <span class="kw">print</span> <span class="str">"wait for confirm exit"</span>
+      <span class="skw">wait</span>(clash_confirm_button, <span class="dig">10</span>)
+      <span class="kw">print</span> <span class="str">"found confirm exit button, going to click"</span>
+      exitable = True
+    <span class="kw">except</span>:
+      <span class="skw">click</span>(geny_back_button)
 
   <span class="skw">click</span>(clash_confirm_button)
   <span class="kw">print</span> <span class="str">"clicked confirm exit"</span>
