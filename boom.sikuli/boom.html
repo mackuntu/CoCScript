@@ -1,0 +1,109 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }
+
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>boom.sikuli</h2> <a href="boom.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+ANDROID_BOOM_ICON = <img src="ANDROID_BOOM_ICON.png" />
+ANDROID_LOCK_BUTTON = <img src="1412005436007.png" />
+CLASH_GAME_ICON = <img src="1449765483207.png" />
+CLASH_RELOAD_BUTTON = <img src="clash_reload_button.png" />
+CLASH_RELOAD_ANOTHER_DEVICE = <img src="clash_reload_another_device.png" />
+CLASH_UPGRADE_ICON = <img src="CLASH_UPGRADE_ICON.png" />
+CLASH_UPGRADE_BUTTON = Pattern(<img src="CLASH_UPGRADE_BUTTON.png" />).similar(<span class="dig">0.66</span>)
+CLASH_UPGRADE_CONFIRM = <img src="CLASH_UPGRADE_CONFIRM.png" />
+CLASH_COIN_PATTERN = <img src="CLASH_COIN_PATTERN.png" />
+CLASH_WOOD_PATTERN = <img src="CLASH_WOOD_PATTERN.png" />
+CLASH_STONE_PATTERN = <img src="CLASH_STONE_PATTERN.png" />
+CLASH_IRON_PATTERN = <img src="CLASH_IRON_PATTERN.png" />
+CLASH_UPGRADE_CANCEL = <img src="CLASH_UPGRADE_CANCEL.png" />
+CLASH_GRASS = <img src="CLASH_GRASS.png" />
+
+GENY_BACK_BUTTON = Pattern(<img src="1412065594056.png" />).similar(<span class="dig">0.67</span>)
+GENY_PLAY_BUTTON = <img src="1412005237101.png" />
+GENY_CONTINUE_BUTTON = <img src="geny_continue_button.png" />
+
+App.focus(<span class="str">"player"</span>)
+all_upgrades_available = findAll(CLASH_UPGRADE_ICON)
+<span class="kw">for</span> update <span class="kw">in</span> all_upgrades_available:
+    update.highlight(<span class="dig">3</span>)
+    update.<span class="skw">click</span>()
+    <span class="skw">sleep</span>(<span class="dig">1</span>)
+    <span class="kw">try</span>:
+        <span class="skw">wait</span>(CLASH_UPGRADE_BUTTON, <span class="dig">10</span>)
+        <span class="skw">click</span>()
+        <span class="skw">wait</span>(CLASH_UPGRADE_CANCEL, <span class="dig">10</span>)
+        <span class="skw">click</span>()
+        <span class="skw">wait</span>(CLASH_GRASS, <span class="dig">10</span>)
+        <span class="skw">click</span>()
+    <span class="kw">except</span>:
+        <span class="kw">print</span> <span class="str">"likely a boat"</span>
+</pre>
+</body>
+</html>
