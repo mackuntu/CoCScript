@@ -13,6 +13,7 @@ minions = "minions.png"
 goblins = "goblins.png"
 donate = Pattern("donate.png").similar(0.85)
 more_donations = Pattern("more_donations.png").exact()
+human_logged_in = "human_logged_in.png"
 
 click_location = None
 
@@ -81,10 +82,35 @@ def donateAsMuchAsPossible():
   except:
     print "no more donations available"
 
+###
+# This isn't being used at the moment, but should interrupt every find or click
+###
+def ifHumanLoggedIn():
+  if exists(human_logged_in):
+    print "detected human login, will sleep for 1hr"
+    sleep(3600)
+
+def setupClickLocation():
+  global click_location
+  try:
+    click_location = find(battle)
+    return True
+  except:
+    print "cannot find battle icon, restarting"
+    return False
+
+def openClashRoyale():
+  App.focus("player")
+  print "attempting to open clash royale"
+  click(clash_icon)
+  while not exists(battle):
+    sleep(5)
+  if not setupClickLocation():
+    click(home_screen)
+    openClashRoyale()
+
 def startWorkflow():
   App.focus("player")
-  global click_location
-  click_location = find(battle)
   openChestIfAvailable()
   unlockChestIfAvailable()
   requestCardsIfAvailable()
@@ -94,11 +120,15 @@ def openClashIfNotification():
   while not exists(clash_notification):
     sleep(r.randint(60,3600))
     App.focus("player")
-  click(clash_icon)
-  while not exists(battle):
-    sleep(5)
+  openClashRoyale()
   startWorkflow()
   click(home_screen)
   openClashIfNotification()
 
+def test():
+  openClashRoyale()
+  startWorkflow()
+  click(home_screen)
+
 openClashIfNotification()
+#test()

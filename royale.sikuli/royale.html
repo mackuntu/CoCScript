@@ -85,6 +85,7 @@ minions = <img src="minions.png" />
 goblins = <img src="goblins.png" />
 donate = Pattern(<img src="donate.png" />).similar(<span class="dig">0.85</span>)
 more_donations = Pattern(<img src="more_donations.png" />).exact()
+human_logged_in = <img src="human_logged_in.png" />
 
 click_location = None
 
@@ -106,9 +107,8 @@ click_location = None
       chest.<span class="skw">click</span>()
       <span class="skw">sleep</span>(<span class="dig">1</span>)
       clickChest()
-  <span class="kw">except</span> Exception <span class="kw">as</span> e:
+  <span class="kw">except</span>:
     <span class="kw">print</span> <span class="str">"no open chests found"</span>
-    <span class="kw">print</span> e
 
 <span class="kw">def</span> unlockChestIfAvailable():
   <span class="kw">if</span> exists(unlock):
@@ -143,9 +143,19 @@ click_location = None
       donation.highlight(<span class="dig">1</span>)
       donation.<span class="skw">click</span>()
       donation.<span class="skw">click</span>()
-    <span class="kw">if</span> exists(more)
   <span class="kw">except</span>:
-    <span class="kw">print</span> <span class="str">"did not find donations"</span>
+    <span class="kw">print</span> <span class="str">"did not find any more donations"</span>
+  <span class="kw">try</span>:
+    <span class="kw">if</span> exists(more_donations):
+      <span class="kw">print</span> <span class="str">"more donations may be possible"</span>
+      <span class="skw">click</span>(more_donations)
+      <span class="skw">sleep</span>(<span class="dig">2</span>)
+      donateAsMuchAsPossible()
+  <span class="kw">except</span>:
+    <span class="kw">print</span> <span class="str">"no more donations available"</span>
+
+<span class="kw">def</span> ifHumanLoggedIn():
+
 
 <span class="kw">def</span> startWorkflow():
   App.focus(<span class="str">"player"</span>)
@@ -155,6 +165,7 @@ click_location = None
   unlockChestIfAvailable()
   requestCardsIfAvailable()
   donateAsMuchAsPossible()
+
 
 <span class="kw">def</span> openClashIfNotification():
   <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
@@ -167,8 +178,7 @@ click_location = None
   <span class="skw">click</span>(home_screen)
   openClashIfNotification()
 
-<span class="cmt">#openClashIfNotification()</span>
-startWorkflow()
+openClashIfNotification()
 </pre>
 </body>
 </html>
