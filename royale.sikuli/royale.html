@@ -70,7 +70,7 @@
 <h2>royale.sikuli</h2> <a href="royale.zip">(Download this script)</a>
 </div>
 <pre class="sikuli-code">
-open_sign = <img src="open.png" />
+open_sign = Pattern(<img src="open.png" />).similar(<span class="dig">0.40</span>)
 unlock = <img src="unlock.png" />
 start_unlock = <img src="1462034142273.png" />
 chest_open = Pattern(<img src="chest_open.png" />).similar(<span class="dig">0.82</span>)
@@ -78,39 +78,62 @@ clash_icon = <img src="clash_icon.png" />
 clash_notification = <img src="clash_notification.png" />
 home_screen = <img src="home_screen.png" />
 battle = <img src="battle.png" />
+msg_window = <img src="msg_window.png" />
+card_request = <img src="card_request.png" />
+minions = <img src="minions.png" />
+goblins = <img src="goblins.png" />
+
 App.focus(<span class="str">"player"</span>)
 
 click_location = None
 
 <span class="kw">def</span> clickChest():
-    <span class="kw">while</span> <span class="kw">not</span> exists(battle):
-        click_location.<span class="skw">click</span>()
+  <span class="kw">while</span> <span class="kw">not</span> exists(battle):
+    <span class="kw">try</span>:
+      click_location.<span class="skw">click</span>()
+    <span class="kw">except</span>:
+      <span class="kw">print</span> <span class="str">"cannot click"</span>
+      <span class="kw">break</span>
 
 <span class="kw">def</span> openChestIfAvailable():
+  <span class="kw">try</span>:
+    <span class="kw">print</span> <span class="str">"looking for open chests"</span>
     all_chests_available = findAll(open_sign)
     <span class="kw">for</span> chest <span class="kw">in</span> all_chests_available:
-        chest.highlight(<span class="dig">3</span>)
-        chest.<span class="skw">click</span>()
-        clickChest()
+      chest.highlight(<span class="dig">3</span>)
+      chest.<span class="skw">click</span>()
+      <span class="skw">sleep</span>(<span class="dig">1</span>)
+      clickChest()
+  <span class="kw">except</span> e:
+    <span class="kw">print</span> <span class="str">"no open chests found"</span>
+    <span class="kw">print</span> e
 
 <span class="kw">def</span> unlockChestIfAvailable():
-    <span class="kw">if</span> exists(unlock):
-        <span class="skw">click</span>()
-        <span class="skw">wait</span>(start_unlock, <span class="dig">4</span>)
-        <span class="skw">click</span>()
+  <span class="kw">if</span> exists(unlock):
+    <span class="skw">click</span>()
+    <span class="skw">wait</span>(start_unlock, <span class="dig">4</span>)
+    <span class="skw">click</span>()
+  <span class="kw">else</span>:
+    <span class="kw">print</span> <span class="str">"no unlock found"</span>
+
+<span class="kw">def</span> requestCardsIfAvailable():
+
 
 <span class="kw">def</span> openClashIfNotification():
-    <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
-        <span class="skw">sleep</span>(<span class="dig">60</span>)
-    <span class="skw">click</span>(clash_icon)
-    <span class="kw">while</span> <span class="kw">not</span> exists(battle):
-        <span class="skw">sleep</span>(<span class="dig">5</span>)
-    click_location = <span class="skw">find</span>(battle)
-    openChestIfAvailable()
-    unlockChestIfAvailable()
-    <span class="skw">click</span>(home_screen)
+  <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
+    <span class="skw">sleep</span>(<span class="dig">60</span>)
+  <span class="skw">click</span>(clash_icon)
+  <span class="kw">while</span> <span class="kw">not</span> exists(battle):
+    <span class="skw">sleep</span>(<span class="dig">5</span>)
+  click_location = <span class="skw">find</span>(battle)
+  openChestIfAvailable()
+  unlockChestIfAvailable()
+  <span class="skw">click</span>(home_screen)
+  openClashIfNotification()
 
 openClashIfNotification()
+<span class="cmt">#openChestIfAvailable()</span>
+
 </pre>
 </body>
 </html>
