@@ -73,7 +73,7 @@
 <span class="kw">import</span> random <span class="kw">as</span> r
 open_sign = Pattern(<img src="open.png" />).similar(<span class="dig">0.40</span>)
 unlock = <img src="unlock.png" />
-start_unlock = <img src="1462034142273.png" />
+start_unlock = <img src="start_unlock.png" />
 chest_open = Pattern(<img src="chest_open.png" />).similar(<span class="dig">0.82</span>)
 clash_icon = <img src="clash_icon.png" />
 clash_notification = <img src="clash_notification.png" />
@@ -86,8 +86,75 @@ goblins = <img src="goblins.png" />
 donate = Pattern(<img src="donate.png" />).similar(<span class="dig">0.85</span>)
 more_donations = Pattern(<img src="more_donations.png" />).exact()
 human_logged_in = <img src="human_logged_in.png" />
+card_received = <img src="card_received.png" />
+close_button = <img src="close_button.png" />
 
 click_location = None
+
+<span class="kw">class</span> HumanLoggedInException(Exception):
+  <span class="str">""" Exception raised for human logging in while executing workflow"""</span>
+  <span class="kw">pass</span>
+
+<span class="kw">class</span> Step():
+  <span class="str">""" Base step class for modeling a single action """</span>
+  <span class="kw">def</span> __init__(self, func, maxRetries = <span class="dig">0</span>, restartOnFail = False):
+    self.func = func
+    self.maxRetries = maxRetries
+    self.restartOnFail = restartOnFail
+    self.runItr = <span class="dig">0</span>
+
+  <span class="kw">def</span> checkIfHumanLoggedIn(self):
+    App.focus(<span class="str">"player"</span>)
+    <span class="skw">sleep</span>(<span class="dig">1</span>)
+    <span class="kw">if</span> exists(human_logged_in):
+      <span class="skw">click</span>(home_screen)
+      <span class="kw">raise</span> HumanLoggedInException
+
+  <span class="kw">def</span> execute_step(self):
+    <span class="kw">print</span> <span class="str">"[INFO] starting {0} iter {1}"</span>.format(self.func.__name__, self.runItr)
+    <span class="kw">try</span>:
+      self.checkIfHumanLoggedIn()
+      self.func()
+      self.checkIfHumanLoggedIn()
+      <span class="kw">return</span> True
+    <span class="kw">except</span> HumanLoggedInException:
+      <span class="kw">print</span> <span class="str">"[WARN] Detected human logged in, sleep for 30 mins"</span>
+      <span class="skw">sleep</span>(<span class="dig">1800</span>)
+      <span class="kw">return</span> False
+    <span class="kw">except</span>:
+      <span class="kw">if</span> self.maxRetries &gt; <span class="dig">0</span> <span class="kw">and</span> self.maxRetries &gt; self.runItr:
+        <span class="kw">print</span> <span class="str">"[INFO] retry enabled for step %s"</span> % self.func.__name__
+        self.runItr += <span class="dig">1</span>
+        <span class="skw">sleep</span>(<span class="dig">1</span>)
+        <span class="kw">print</span> <span class="str">"[INFO] retrying..."</span>
+        self.execute_step()
+      <span class="kw">else</span>:
+        self.runItr = <span class="dig">0</span>
+        <span class="kw">return</span> False
+
+
+<span class="kw">class</span> Workflow():
+  <span class="str">""" Base workflow class for modeling a sequence of actions """</span>
+  <span class="kw">def</span> __init__(self, steps = []):
+    self.steps = steps
+
+  <span class="kw">def</span> add_step(self, step):
+    self.steps.append(step)
+
+  <span class="kw">def</span> execute(self):
+    <span class="kw">for</span> step <span class="kw">in</span> self.steps:
+      <span class="kw">if</span> <span class="kw">not</span> step.execute_step():
+        <span class="kw">if</span> step.restartOnFail:
+          self.execute()
+          <span class="kw">break</span>
+
+  <span class="kw">def</span> runForever(self):
+    counter = <span class="dig">0</span>
+    <span class="kw">while</span> True:
+      <span class="kw">print</span> <span class="str">"[INFO] Starting run %d"</span> % counter
+      self.execute()
+      <span class="skw">sleep</span>(<span class="dig">1</span>)
+      counter += <span class="dig">1</span>
 
 <span class="kw">def</span> clickChest():
   <span class="kw">while</span> <span class="kw">not</span> exists(battle):
@@ -154,31 +221,54 @@ click_location = None
   <span class="kw">except</span>:
     <span class="kw">print</span> <span class="str">"no more donations available"</span>
 
-<span class="kw">def</span> ifHumanLoggedIn():
-
-
-<span class="kw">def</span> startWorkflow():
-  App.focus(<span class="str">"player"</span>)
+<span class="kw">def</span> setupClickLocation():
   <span class="kw">global</span> click_location
   click_location = <span class="skw">find</span>(battle)
-  openChestIfAvailable()
-  unlockChestIfAvailable()
-  requestCardsIfAvailable()
-  donateAsMuchAsPossible()
 
-
-<span class="kw">def</span> openClashIfNotification():
-  <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
-    <span class="skw">sleep</span>(r.randint(<span class="dig">60</span>,<span class="dig">3600</span>))
-    App.focus(<span class="str">"player"</span>)
+<span class="kw">def</span> openClashRoyale():
+  <span class="kw">print</span> <span class="str">"attempting to open clash royale"</span>
   <span class="skw">click</span>(clash_icon)
-  <span class="kw">while</span> <span class="kw">not</span> exists(battle):
-    <span class="skw">sleep</span>(<span class="dig">5</span>)
+
+  <span class="kw">if</span> <span class="kw">not</span> setupClickLocation():
+    <span class="skw">click</span>(home_screen)
+    openClashRoyale()
+
+<span class="kw">def</span> checkCardReceived():
+  <span class="kw">if</span> exists(card_received):
+    <span class="kw">print</span> <span class="str">"[INFO] Cards received, closing dialog"</span>
+    <span class="skw">click</span>(close_button)
+    <span class="skw">sleep</span>(<span class="dig">2</span>)
+
+<span class="kw">def</span> waitForClashNotification():
+  <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
+    <span class="skw">sleep</span>(r.randint(<span class="dig">60</span>, <span class="dig">3600</span>))
+    App.focus(<span class="str">"player"</span>)
+
+<span class="kw">def</span> init():
+  <span class="skw">click</span>(home_screen)
+
+<span class="kw">def</span> buildWorkflow():
+  workflow = Workflow()
+  <span class="cmt">#workflow.add_step(Step(func = init, maxRetries = 0, restartOnFail = False))</span>
+  <span class="cmt">#workflow.add_step(Step(func = waitForClashNotification, maxRetries = 0, restartOnFail = False))</span>
+  <span class="cmt">#workflow.add_step(Step(func = openClashRoyale, maxRetries = 3, restartOnFail = True))</span>
+  workflow.add_step(Step(func = checkCardReceived, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  workflow.add_step(Step(func = setupClickLocation, maxRetries = <span class="dig">0</span>, restartOnFail = True))
+  workflow.add_step(Step(func = openChestIfAvailable, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  workflow.add_step(Step(func = unlockChestIfAvailable, maxRetries = <span class="dig">3</span>, restartOnFail = False))
+  workflow.add_step(Step(func = requestCardsIfAvailable, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  workflow.add_step(Step(func = donateAsMuchAsPossible, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  <span class="kw">return</span> workflow
+
+<span class="kw">def</span> test():
+  openClashRoyale()
   startWorkflow()
   <span class="skw">click</span>(home_screen)
-  openClashIfNotification()
 
-openClashIfNotification()
+clashRoyalWorkflow = buildWorkflow()
+clashRoyalWorkflow.runForever()
+<span class="cmt">#test()</span>
+
 </pre>
 </body>
 </html>

@@ -1,7 +1,9 @@
 import random as r
+import datetime
+
 open_sign = Pattern("open.png").similar(0.40)
 unlock = "unlock.png"
-start_unlock = "1462034142273.png"
+start_unlock = "start_unlock.png"
 chest_open = Pattern("chest_open.png").similar(0.82)
 clash_icon = "clash_icon.png"
 clash_notification = "clash_notification.png"
@@ -14,8 +16,75 @@ goblins = "goblins.png"
 donate = Pattern("donate.png").similar(0.85)
 more_donations = Pattern("more_donations.png").exact()
 human_logged_in = "human_logged_in.png"
+card_received = "card_received.png"
+close_button = "close_button.png"
 
 click_location = None
+
+class HumanLoggedInException(Exception):
+  """ Exception raised for human logging in while executing workflow"""
+  pass
+
+class Step():
+  """ Base step class for modeling a single action """
+  def __init__(self, func, maxRetries = 0, restartOnFail = False):
+    self.func = func
+    self.maxRetries = maxRetries
+    self.restartOnFail = restartOnFail
+    self.runItr = 0
+
+  def checkIfHumanLoggedIn(self):
+    App.focus("player")
+    sleep(1)
+    if exists(human_logged_in):
+      click(home_screen)
+      raise HumanLoggedInException
+
+  def execute_step(self):
+    print "[INFO] starting {0} iter {1}".format(self.func.__name__, self.runItr)
+    try:
+      self.checkIfHumanLoggedIn()
+      self.func()
+      self.checkIfHumanLoggedIn()
+      return True
+    except HumanLoggedInException:
+      print "[WARN] Detected human logged in, sleep for 30 mins"
+      sleep(1800)
+      return False
+    except:
+      if self.maxRetries > 0 and self.maxRetries > self.runItr:
+        print "[INFO] retry enabled for step %s" % self.func.__name__
+        self.runItr += 1
+        sleep(1)
+        print "[INFO] retrying..."
+        self.execute_step()
+      else:
+        self.runItr = 0
+        return False
+
+
+class Workflow():
+  """ Base workflow class for modeling a sequence of actions """
+  def __init__(self, steps = []):
+    self.steps = steps
+
+  def add_step(self, step):
+    self.steps.append(step)
+
+  def execute(self):
+    for step in self.steps:
+      if not step.execute_step():
+        if step.restartOnFail:
+          self.execute()
+          break
+
+  def runForever(self):
+    counter = 0
+    while True:
+      print "[INFO] Starting run %d" % counter
+      self.execute()
+      sleep(1)
+      counter += 1
 
 def clickChest():
   while not exists(battle):
@@ -69,8 +138,8 @@ def donateAsMuchAsPossible():
     for donation in all_donations:
       print "donating..."
       donation.highlight(1)
-      donation.click()
-      donation.click()
+      for x in xrange(1,6):
+        donation.click()
   except:
     print "did not find any more donations"
   try:
@@ -82,53 +151,49 @@ def donateAsMuchAsPossible():
   except:
     print "no more donations available"
 
-###
-# This isn't being used at the moment, but should interrupt every find or click
-###
-def ifHumanLoggedIn():
-  if exists(human_logged_in):
-    print "detected human login, will sleep for 1hr"
-    sleep(3600)
-
 def setupClickLocation():
   global click_location
-  try:
-    click_location = find(battle)
-    return True
-  except:
-    print "cannot find battle icon, restarting"
-    return False
+  click_location = find(battle)
 
 def openClashRoyale():
-  App.focus("player")
   print "attempting to open clash royale"
   click(clash_icon)
-  while not exists(battle):
-    sleep(5)
-  if not setupClickLocation():
-    click(home_screen)
-    openClashRoyale()
+  sleep(10)
 
-def startWorkflow():
-  App.focus("player")
-  openChestIfAvailable()
-  unlockChestIfAvailable()
-  requestCardsIfAvailable()
-  donateAsMuchAsPossible()
+def checkCardReceived():
+  if exists(card_received):
+    print "[INFO] Cards received, closing dialog"
+    click(close_button)
+    sleep(2)
 
-def openClashIfNotification():
+def waitForClashNotification():
   while not exists(clash_notification):
-    sleep(r.randint(60,3600))
+    sleepTime = r.randint(60, 300)
+    print "[INFO] will sleep for {0} seconds, checking again at {1}".format(sleepTime, datetime.datetime.now() + datetime.timedelta(seconds=sleepTime))
+    sleep(sleepTime)
     App.focus("player")
-  openClashRoyale()
-  startWorkflow()
+
+def init():
   click(home_screen)
-  openClashIfNotification()
+
+def buildWorkflow():
+  workflow = Workflow()
+  workflow.add_step(Step(func = init, maxRetries = 0, restartOnFail = False))
+  workflow.add_step(Step(func = waitForClashNotification, maxRetries = 0, restartOnFail = False))
+  workflow.add_step(Step(func = openClashRoyale, maxRetries = 3, restartOnFail = True))
+  workflow.add_step(Step(func = checkCardReceived, maxRetries = 0, restartOnFail = False))
+  workflow.add_step(Step(func = setupClickLocation, maxRetries = 0, restartOnFail = True))
+  workflow.add_step(Step(func = openChestIfAvailable, maxRetries = 0, restartOnFail = False))
+  workflow.add_step(Step(func = unlockChestIfAvailable, maxRetries = 3, restartOnFail = False))
+  workflow.add_step(Step(func = requestCardsIfAvailable, maxRetries = 0, restartOnFail = False))
+  workflow.add_step(Step(func = donateAsMuchAsPossible, maxRetries = 0, restartOnFail = False))
+  return workflow
 
 def test():
   openClashRoyale()
   startWorkflow()
   click(home_screen)
 
-openClashIfNotification()
+clashRoyalWorkflow = buildWorkflow()
+clashRoyalWorkflow.runForever()
 #test()
