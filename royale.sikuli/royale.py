@@ -167,11 +167,16 @@ def checkCardReceived():
     sleep(2)
 
 def waitForClashNotification():
+  totalSleep = 0
   while not exists(clash_notification):
     sleepTime = r.randint(60, 300)
     print "[INFO] will sleep for {0} seconds, checking again at {1}".format(sleepTime, datetime.datetime.now() + datetime.timedelta(seconds=sleepTime))
     sleep(sleepTime)
+    totalSleep += sleepTime
     App.focus("player")
+    # Enforces we open at least once an hour
+    if totalSleep > 3600:
+      return
 
 def init():
   click(home_screen)
