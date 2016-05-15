@@ -13,6 +13,7 @@ msg_window = "msg_window.png"
 card_request = Pattern("card_request.png").similar(0.79)
 minions = "minions.png"
 goblins = "goblins.png"
+minion = "minion.png"
 donate = Pattern("donate.png").similar(0.85)
 more_donations = Pattern("more_donations.png").exact()
 human_logged_in = "human_logged_in.png"
@@ -124,7 +125,10 @@ def requestCardsIfAvailable():
     print "found card request available"
     click(card_request)
     sleep(2)
-  if exists(goblins):
+  if exists(minion):
+    print "found minion to request"
+    click(minion)
+  elif exists(goblins):
     print "found goblins to request"
     click(goblins)
   elif exists(minions):
@@ -138,8 +142,9 @@ def donateAsMuchAsPossible():
     for donation in all_donations:
       print "donating..."
       donation.highlight(1)
-      for x in xrange(1,6):
+      for x in xrange(0,6):
         donation.click()
+        sleep(0.5)
   except:
     print "did not find any more donations"
   try:

@@ -71,6 +71,8 @@
 </div>
 <pre class="sikuli-code">
 <span class="kw">import</span> random <span class="kw">as</span> r
+<span class="kw">import</span> datetime
+
 open_sign = Pattern(<img src="open.png" />).similar(<span class="dig">0.40</span>)
 unlock = <img src="unlock.png" />
 start_unlock = <img src="start_unlock.png" />
@@ -83,6 +85,7 @@ msg_window = <img src="msg_window.png" />
 card_request = Pattern(<img src="card_request.png" />).similar(<span class="dig">0.79</span>)
 minions = <img src="minions.png" />
 goblins = <img src="goblins.png" />
+minion = <img src="minion.png" />
 donate = Pattern(<img src="donate.png" />).similar(<span class="dig">0.85</span>)
 more_donations = Pattern(<img src="more_donations.png" />).exact()
 human_logged_in = <img src="human_logged_in.png" />
@@ -194,7 +197,10 @@ click_location = None
     <span class="kw">print</span> <span class="str">"found card request available"</span>
     <span class="skw">click</span>(card_request)
     <span class="skw">sleep</span>(<span class="dig">2</span>)
-  <span class="kw">if</span> exists(goblins):
+  <span class="kw">if</span> exists(minion):
+    <span class="kw">print</span> <span class="str">"found minion to request"</span>
+    <span class="skw">click</span>(minion)
+  <span class="kw">elif</span> exists(goblins):
     <span class="kw">print</span> <span class="str">"found goblins to request"</span>
     <span class="skw">click</span>(goblins)
   <span class="kw">elif</span> exists(minions):
@@ -208,8 +214,9 @@ click_location = None
     <span class="kw">for</span> donation <span class="kw">in</span> all_donations:
       <span class="kw">print</span> <span class="str">"donating..."</span>
       donation.highlight(<span class="dig">1</span>)
-      donation.<span class="skw">click</span>()
-      donation.<span class="skw">click</span>()
+      <span class="kw">for</span> x <span class="kw">in</span> xrange(<span class="dig">0</span>,<span class="dig">6</span>):
+        donation.<span class="skw">click</span>()
+        <span class="skw">sleep</span>(<span class="dig">0.5</span>)
   <span class="kw">except</span>:
     <span class="kw">print</span> <span class="str">"did not find any more donations"</span>
   <span class="kw">try</span>:
@@ -228,10 +235,7 @@ click_location = None
 <span class="kw">def</span> openClashRoyale():
   <span class="kw">print</span> <span class="str">"attempting to open clash royale"</span>
   <span class="skw">click</span>(clash_icon)
-
-  <span class="kw">if</span> <span class="kw">not</span> setupClickLocation():
-    <span class="skw">click</span>(home_screen)
-    openClashRoyale()
+  <span class="skw">sleep</span>(<span class="dig">10</span>)
 
 <span class="kw">def</span> checkCardReceived():
   <span class="kw">if</span> exists(card_received):
@@ -240,18 +244,25 @@ click_location = None
     <span class="skw">sleep</span>(<span class="dig">2</span>)
 
 <span class="kw">def</span> waitForClashNotification():
+  totalSleep = <span class="dig">0</span>
   <span class="kw">while</span> <span class="kw">not</span> exists(clash_notification):
-    <span class="skw">sleep</span>(r.randint(<span class="dig">60</span>, <span class="dig">3600</span>))
+    sleepTime = r.randint(<span class="dig">60</span>, <span class="dig">300</span>)
+    <span class="kw">print</span> <span class="str">"[INFO] will sleep for {0} seconds, checking again at {1}"</span>.format(sleepTime, datetime.datetime.now() + datetime.timedelta(seconds=sleepTime))
+    <span class="skw">sleep</span>(sleepTime)
+    totalSleep += sleepTime
     App.focus(<span class="str">"player"</span>)
+    <span class="cmt"># Enforces we open at least once an hour</span>
+    <span class="kw">if</span> totalSleep &gt; <span class="dig">3600</span>:
+      <span class="kw">return</span>
 
 <span class="kw">def</span> init():
   <span class="skw">click</span>(home_screen)
 
 <span class="kw">def</span> buildWorkflow():
   workflow = Workflow()
-  <span class="cmt">#workflow.add_step(Step(func = init, maxRetries = 0, restartOnFail = False))</span>
-  <span class="cmt">#workflow.add_step(Step(func = waitForClashNotification, maxRetries = 0, restartOnFail = False))</span>
-  <span class="cmt">#workflow.add_step(Step(func = openClashRoyale, maxRetries = 3, restartOnFail = True))</span>
+  workflow.add_step(Step(func = init, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  workflow.add_step(Step(func = waitForClashNotification, maxRetries = <span class="dig">0</span>, restartOnFail = False))
+  workflow.add_step(Step(func = openClashRoyale, maxRetries = <span class="dig">3</span>, restartOnFail = True))
   workflow.add_step(Step(func = checkCardReceived, maxRetries = <span class="dig">0</span>, restartOnFail = False))
   workflow.add_step(Step(func = setupClickLocation, maxRetries = <span class="dig">0</span>, restartOnFail = True))
   workflow.add_step(Step(func = openChestIfAvailable, maxRetries = <span class="dig">0</span>, restartOnFail = False))
